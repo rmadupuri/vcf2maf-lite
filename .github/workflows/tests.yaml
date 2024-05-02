@@ -7,7 +7,7 @@ jobs:
       run:
         working-directory: ./vcf2maf-lite
     env:
-      PYTHONPATH: ../:$PYTHONPATH
+      PYTHONPATH: ..
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
