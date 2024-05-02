@@ -2,9 +2,7 @@
 
 import unittest
 import tempfile
-import sys
 import os
-sys.path.append('..')
 from vcf2maf_lite import extract_vcf_data_from_file
 
 class vcf2maf_lite_DataTests(unittest.TestCase):
