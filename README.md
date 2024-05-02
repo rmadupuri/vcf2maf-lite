@@ -1,4 +1,4 @@
-## vcf2maf_lite
+# vcf2maf_lite
 
 vcf2maf_lite is a lightweight Python adaptation of the [vcf2maf Perl tool](https://github.com/mskcc/vcf2maf), designed to convert the VCF format to MAF format without adding variant annotations. For annotating a MAF file, [Genome Nexus](https://github.com/genome-nexus/genome-nexus-annotation-pipeline) can be utilized.
 
