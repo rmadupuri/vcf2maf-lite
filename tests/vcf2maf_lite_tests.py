@@ -3,6 +3,7 @@
 import unittest
 import tempfile
 import sys
+import os
 sys.path.append('..')
 from vcf2maf_lite import extract_vcf_data_from_file
 
@@ -27,7 +28,7 @@ class vcf2maf_lite_DataTests(unittest.TestCase):
             "20\t14370\trs6054257\tG\tA\t29\tPASS\tNS=3;DP=14;AF=0.5;DB;H2\tGT:GQ:DP:HQ\t0|0:48:1:51,51\n"
            ) 
         maf_data = extract_vcf_data_from_file(vcf, 'center name 1', 'sequence source 1')
-        self.assertEqual(1, len(maf_data)) 
+        self.assertEqual(1, len(maf_data))
         maf_row = maf_data[0]
         self.assertEqual('S1', maf_row['Tumor_Sample_Barcode']) 
         self.assertEqual('NORMAL', maf_row['Matched_Norm_Sample_Barcode']) 
@@ -71,9 +72,9 @@ class vcf2maf_lite_DataTests(unittest.TestCase):
         self.assertEqual("Expected max 2 sample columns for tumor and normal sample. But found 3 columns.", str(exc.exception))
 
     def test_extract_vcf_data_from_file_tumor_normal_swap(self):
-        # this test is just showing that the name of the columns does not matter...it will be the order
-        # that matters in this case: first column is seen as Tumor_Sample_Barcode, second column as Matched_Norm_Sample_Barcode:
+        # this test is just showing that the order of the columns does not matter...
         _, vcf = tempfile.mkstemp()
+        tumor_sample_id = os.path.basename(vcf)
         with open(vcf, 'w') as f:
            f.write(
             "#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\tNORMAL\tTUMOR\n"
@@ -82,8 +83,8 @@ class vcf2maf_lite_DataTests(unittest.TestCase):
         maf_data = extract_vcf_data_from_file(vcf, 'center name 1', 'sequence source 1')
         self.assertEqual(1, len(maf_data))
         maf_row = maf_data[0]
-        self.assertEqual('NORMAL', maf_row['Tumor_Sample_Barcode'])
-        self.assertEqual('TUMOR', maf_row['Matched_Norm_Sample_Barcode'])
+        self.assertEqual(tumor_sample_id, maf_row['Tumor_Sample_Barcode'])
+        self.assertEqual('NORMAL', maf_row['Matched_Norm_Sample_Barcode'])
 
     def test_extract_vcf_data_from_file_1_normal_sample(self):
         _, vcf = tempfile.mkstemp()
@@ -180,6 +181,88 @@ class vcf2maf_lite_DataTests(unittest.TestCase):
         with self.assertRaises(Exception) as exc:
             extract_vcf_data_from_file(vcf, 'center name 1', 'sequence source 1')
         self.assertIn("The tumor_sample and normal_sample are expected together", str(exc.exception))
+        
+    def test_extract_vcf_data_from_file_invalid_data_file(self):
+        _, vcf = tempfile.mkstemp()
+        with open(vcf, 'w') as f:
+            f.write(
+            '##normal_sample=TUMOR\n'
+            '##tumor_sample=NORMAL\n'
+            "#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\tTUMOR\tNORMAL\n"
+            )
+        maf_data = extract_vcf_data_from_file(vcf, 'center name 1', 'sequence source 1')
+        self.assertEqual([], maf_data)
+    
+    def test_extract_vcf_data_from_file_malformed_records(self):
+        _, vcf = tempfile.mkstemp()
+        with open(vcf, 'w') as f:
+            f.write(
+            '##normal_sample=TUMOR\n'
+            '##tumor_sample=NORMAL\n'
+            "#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\tTUMOR\tNORMAL\n"
+            "20\t14370\trs6054257\tG\tA\t29\tPASS\t\tNS=3;DP=14;AF=0.5;DB;H2\tGT:GQ:DP:HQ\t0|0:48:1:51,51\t1|0:48:8:51,51\n"
+            )
+        maf_data = extract_vcf_data_from_file(vcf, 'center name 1', 'sequence source 1')
+        self.assertEqual(None, maf_data)
+    
+    def test_extract_vcf_data_from_file_varscan_allele_counts(self):
+        _, vcf = tempfile.mkstemp()
+        with open(vcf, 'w') as f:
+            f.write(
+            "#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\tS1\n"
+            "1\t10105\t.\tA\tC\t7\tPASS\tNS=3;DP=14;AF=0.5;DB;H2\tGT:AD:RD:FT:GQ:GL\t1/0:30:15:PASS:13:-1.58548,-0.0193946,-153.729\n"
+            )
+        maf_data = extract_vcf_data_from_file(vcf, 'center name 1', 'sequence source 1')
+        self.assertEqual(1, len(maf_data))
+        maf_row = maf_data[0]
+        self.assertEqual('15', maf_row['t_ref_count'])
+        self.assertEqual('30', maf_row['t_alt_count'])
+        self.assertEqual('45', maf_row['t_depth'])
+        
+    def test_extract_vcf_data_from_file_strelka_snp_allele_counts(self):
+        _, vcf = tempfile.mkstemp()
+        with open(vcf, 'w') as f:
+            f.write(
+            "#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\tTUMOR\n"
+            "1\t10105\t.\tA\tN\t7\tPASS\tNS=3;DP=14;AF=0.5;DB;H2\tGT:AU:CU:GU:TU:FT\t1/0:20:15:10:10:PASS\n"
+            )
+        maf_data = extract_vcf_data_from_file(vcf, 'center name 1', 'sequence source 1')
+        self.assertEqual(1, len(maf_data))
+        maf_row = maf_data[0]
+        self.assertEqual('20', maf_row['t_ref_count'])
+        self.assertEqual('15', maf_row['t_alt_count'])
+        self.assertEqual('35', maf_row['t_depth'])
+        
+    def test_extract_vcf_data_from_file_bcftools_allele_counts(self):
+        _, vcf = tempfile.mkstemp()
+        with open(vcf, 'w') as f:
+            f.write(
+            "#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\tTUMOR\n"
+            "1\t10105\t.\tA\tT\t7\tPASS\tNS=3;DP=50;AF=0.5;DB;H2\tGT:DV:DP:FT\t1/0:30:50:PASS\n"
+            )
+        maf_data = extract_vcf_data_from_file(vcf, 'center name 1', 'sequence source 1')
+        self.assertEqual(1, len(maf_data))
+        maf_row = maf_data[0]
+        self.assertEqual('30', maf_row['t_alt_count'])
+        self.assertEqual('50', maf_row['t_depth'])
+        
+    def test_extract_vcf_data_from_file_resolve_alleles_positions_variant_class(self):
+        _, vcf = tempfile.mkstemp()
+        with open(vcf, 'w') as f:
+            f.write(
+            "#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\tNORMAL\tTUMOR\n"
+            "1\t45796859\t.\tTCATGGCGGTGG\tT\t.\tPASS\tCONTQ=93;DP=1307;ECNT=1\tGT:AD:AF:DP\t0/0:343,1:0.005711:344\t0/1:920,5:0.006427:925\n"
+            "1\t10496754\t.\tA\tACC\t.\tPASS\tDP=104;ECNT=1\tGT:AD:AF:DP\t1/0:34,23:0.005711:344\t0/1:920,5:0.006427:925\n"
+            )
+        maf_data = extract_vcf_data_from_file(vcf, 'center name 1', 'sequence source 1')
+        self.assertEqual(2, len(maf_data))
+        maf_row = maf_data[0]
+        self.assertEqual('Frame_Shift_Del', maf_row['Variant_Classification'])
+        self.assertEqual('DEL', maf_row['Variant_Type'])
+        self.assertEqual('CATGGCGGTGG', maf_row['Reference_Allele'])
+        self.assertEqual('-', maf_row['Tumor_Seq_Allele2'])
+        self.assertEqual('45796860', maf_row['Start_Position'])
+        self.assertEqual('45796870', maf_row['End_Position'])
 
 if __name__=='__main__':
     unittest.main()

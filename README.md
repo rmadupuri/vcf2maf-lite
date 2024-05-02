@@ -19,10 +19,12 @@ python3 vcf2maf_lite.py --help
 ```
 python 3
 ```
+
 ### Running the tool example
 ```
 python3 vcf2maf.py --input-data /data/vcf --output-directory /data/maf/ --center-name CTR --sequence-source WGS --tumor-id Tumor --normal-id Normal
 ```
+
 This command converts the VCF files in /vcf folder to MAF format. 
 - The `--input-data` option is used to specify either a single VCF file or a directory containing multiple VCF files (separated by commas). This option supports passing multiple input files or directories at once.
 - The `--output-directory` option allows you to specify the directory where the MAF files will be saved. If no output path is provided, the default output directory `vcf2maf_output` will be used in the current working directory. 
@@ -32,3 +34,23 @@ This command converts the VCF files in /vcf folder to MAF format.
 ### Germline files
 
 If `germline` is in the filename then `vcf2maf_lite.py` will assume that the file contains germline data. This will set the value in the output MAF `Mutation_Status` column to "GERMLINE". Please follow this naming convention if the mutation data file(s) are germline data.
+
+# Points to note:
+1. If 'normal' in filename, will skip porcessing the file.
+
+## Sequencing formats supported:
+
+
+### How do we pick the tumor/normal column:
+- if the tumor_id and normal_id are provided, then use them to find the sample data columns
+- The provided Tumor ID: '{tumor_id}' or Normal ID: '{normal_id}' were not found in the VCF file. Parsing the names and sample ids in the old way (from column headers).
+- if tumor_sample and normal_sample in the meta headers. If only one found raises an exception
+- 
+
+
+
+
+
+
+
+
