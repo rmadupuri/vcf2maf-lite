@@ -5,14 +5,12 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: ./vcf2maf-lite
+        working-directory: ./
     env:
-      PYTHONPATH: ..
+      PYTHONPATH: ./:$PYTHONPATH
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
-      with:
-        path: ./vcf2maf-lite
     - name: Set up Python
       uses: actions/setup-python@v2
       with:
