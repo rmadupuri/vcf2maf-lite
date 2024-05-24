@@ -3,12 +3,24 @@
 import unittest
 import tempfile
 import os
+import sys
+sys.path.append('..')
 from vcf2maf_lite import extract_vcf_data_from_file
+from vcf2maf_lite import write_standardized_mutation_file
 
 class vcf2maf_lite_DataTests(unittest.TestCase):
 
+    def setUp(self):
+        self.temp_files = []
+
+    def tearDown(self):
+        for temp_file in self.temp_files:
+            if os.path.exists(temp_file):
+                os.remove(temp_file)
+
     def test_extract_vcf_data_from_file_no_samples(self):
         _, vcf = tempfile.mkstemp()
+        self.temp_files.append(vcf)
         with open(vcf, 'w') as f:
            f.write(
             "#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\n"
@@ -20,6 +32,7 @@ class vcf2maf_lite_DataTests(unittest.TestCase):
 
     def test_extract_vcf_data_from_file_1_sample(self):
         _, vcf = tempfile.mkstemp()
+        self.temp_files.append(vcf)
         with open(vcf, 'w') as f:
            f.write(
             "#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\tS1\n"
@@ -33,6 +46,7 @@ class vcf2maf_lite_DataTests(unittest.TestCase):
 
     def test_extract_vcf_data_from_file_2_samples(self):
         _, vcf = tempfile.mkstemp()
+        self.temp_files.append(vcf)
         with open(vcf, 'w') as f:
            f.write(
             "#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\tS1\tS2\n"
@@ -46,6 +60,7 @@ class vcf2maf_lite_DataTests(unittest.TestCase):
 
     def test_extract_vcf_data_from_file_tumor(self):
         _, vcf = tempfile.mkstemp()
+        self.temp_files.append(vcf)
         with open(vcf, 'w') as f:
            f.write(
             "#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\tTUMOR\n"
@@ -60,6 +75,7 @@ class vcf2maf_lite_DataTests(unittest.TestCase):
 
     def test_extract_vcf_data_from_file_3_samples(self):
         _, vcf = tempfile.mkstemp()
+        self.temp_files.append(vcf)
         with open(vcf, 'w') as f:
            f.write(
             "#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\tS1\tS2\tS3\n"
@@ -72,6 +88,7 @@ class vcf2maf_lite_DataTests(unittest.TestCase):
     def test_extract_vcf_data_from_file_tumor_normal_swap(self):
         # this test is just showing that the order of the columns does not matter...
         _, vcf = tempfile.mkstemp()
+        self.temp_files.append(vcf)
         tumor_sample_id = os.path.basename(vcf)
         with open(vcf, 'w') as f:
            f.write(
@@ -86,6 +103,7 @@ class vcf2maf_lite_DataTests(unittest.TestCase):
 
     def test_extract_vcf_data_from_file_1_normal_sample(self):
         _, vcf = tempfile.mkstemp()
+        self.temp_files.append(vcf)
         with open(vcf, 'w') as f:
            f.write(
             "#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\tNORMAL\n"
@@ -97,6 +115,7 @@ class vcf2maf_lite_DataTests(unittest.TestCase):
 
     def test_extract_vcf_data_from_file_2_samples_specified_in_header(self):
         _, vcf = tempfile.mkstemp()
+        self.temp_files.append(vcf)
         with open(vcf, 'w') as f:
            f.write(
             '##normal_sample=S1\n'
@@ -114,6 +133,7 @@ class vcf2maf_lite_DataTests(unittest.TestCase):
         # same as above, but with column order reversed in CHROM header line...should still give the same result, just
         # to show that it is really reading from header and not from column order:
         _, vcf = tempfile.mkstemp()
+        self.temp_files.append(vcf)
         with open(vcf, 'w') as f:
            f.write(
             '##normal_sample=S1\n'
@@ -129,6 +149,7 @@ class vcf2maf_lite_DataTests(unittest.TestCase):
 
     def test_extract_vcf_data_from_file_normal_sample_refers_to_non_existing_column(self):
         _, vcf = tempfile.mkstemp()
+        self.temp_files.append(vcf)
         with open(vcf, 'w') as f:
            f.write(
             '##normal_sample=S1\n'
@@ -142,6 +163,7 @@ class vcf2maf_lite_DataTests(unittest.TestCase):
 
     def test_extract_vcf_data_from_file_tumor_sample_refers_to_non_existing_column(self):
         _, vcf = tempfile.mkstemp()
+        self.temp_files.append(vcf)
         with open(vcf, 'w') as f:
            f.write(
             '##normal_sample=S1\n'
@@ -155,6 +177,7 @@ class vcf2maf_lite_DataTests(unittest.TestCase):
 
     def test_extract_vcf_data_from_file_header_samples_have_precedence_over_the_rest_of_strategies(self):
         _, vcf = tempfile.mkstemp()
+        self.temp_files.append(vcf)
         with open(vcf, 'w') as f:
            f.write(
             '##normal_sample=TUMOR\n'
@@ -170,6 +193,7 @@ class vcf2maf_lite_DataTests(unittest.TestCase):
 
     def test_extract_vcf_data_from_file_multiple_equals_in_header(self):
         _, vcf = tempfile.mkstemp()
+        self.temp_files.append(vcf)
         with open(vcf, 'w') as f:
            f.write(
             '##tumor_sample=A=B\n'
@@ -182,6 +206,7 @@ class vcf2maf_lite_DataTests(unittest.TestCase):
         
     def test_extract_vcf_data_from_file_invalid_data_file(self):
         _, vcf = tempfile.mkstemp()
+        self.temp_files.append(vcf)
         with open(vcf, 'w') as f:
             f.write(
             '##normal_sample=TUMOR\n'
@@ -193,6 +218,7 @@ class vcf2maf_lite_DataTests(unittest.TestCase):
     
     def test_extract_vcf_data_from_file_malformed_records(self):
         _, vcf = tempfile.mkstemp()
+        self.temp_files.append(vcf)
         with open(vcf, 'w') as f:
             f.write(
             '##normal_sample=TUMOR\n'
@@ -205,6 +231,7 @@ class vcf2maf_lite_DataTests(unittest.TestCase):
     
     def test_extract_vcf_data_from_file_varscan_allele_counts(self):
         _, vcf = tempfile.mkstemp()
+        self.temp_files.append(vcf)
         with open(vcf, 'w') as f:
             f.write(
             "#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\tS1\n"
@@ -219,6 +246,7 @@ class vcf2maf_lite_DataTests(unittest.TestCase):
         
     def test_extract_vcf_data_from_file_strelka_snp_allele_counts(self):
         _, vcf = tempfile.mkstemp()
+        self.temp_files.append(vcf)
         with open(vcf, 'w') as f:
             f.write(
             "#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\tTUMOR\n"
@@ -233,6 +261,7 @@ class vcf2maf_lite_DataTests(unittest.TestCase):
         
     def test_extract_vcf_data_from_file_bcftools_allele_counts(self):
         _, vcf = tempfile.mkstemp()
+        self.temp_files.append(vcf)
         with open(vcf, 'w') as f:
             f.write(
             "#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\tTUMOR\n"
@@ -246,6 +275,7 @@ class vcf2maf_lite_DataTests(unittest.TestCase):
         
     def test_extract_vcf_data_from_file_resolve_alleles_positions_variant_class(self):
         _, vcf = tempfile.mkstemp()
+        self.temp_files.append(vcf)
         with open(vcf, 'w') as f:
             f.write(
             "#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\tNORMAL\tTUMOR\n"
@@ -261,6 +291,34 @@ class vcf2maf_lite_DataTests(unittest.TestCase):
         self.assertEqual('-', maf_row['Tumor_Seq_Allele2'])
         self.assertEqual('45796860', maf_row['Start_Position'])
         self.assertEqual('45796870', maf_row['End_Position'])
+        
+
+    def test_extract_vcf_data_from_file_na_in_output_file(self):
+        _, vcf = tempfile.mkstemp()
+        self.temp_files.append(vcf)
+        with open(vcf, 'w') as f:
+            f.write(
+                "#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\tFORMAT\tNORMAL\tTUMOR\n"
+                "1\t45796859\t.\tTCATGGCGGTGG\tT\t.\tPASS\tMuTect2;Custom_filters=strand_bias;RepeatMasker=Simple_repeat;DP=1191\tGT:AD:AF:DP:alt_count_raw:ref_count_raw:depth_raw\t0/0:343,1:0.005711:344:0:424:425\t0/1:920,5:0.006427:925:0:1184:1191\n"
+                "2\t114020823\t.\tG\tGT\t.\tPASS\tStrelka2;Custom_filters=strand_bias;RepeatMasker=Low_complexity;PoN=53;DP=53\tGT:AD:AF:DP:alt_count_raw:ref_count_raw:depth_raw\t1/0:34,23:0.005711:344:1:12:13\t0/1:920,5:0.006427:925:7:46:53\n"
+                "6\t32521751\t.\tA\tT\t.\tPASS\tMuTect2;Strelka2;Strelka2FILTER;DP=677\tGT:AD:AF:DP:alt_count_raw:ref_count_raw:depth_raw\t0/0:343,1:0.005711:344:0:159:160\t1/0:34,23:0.005711:344:20:657:677\n"
+            )
+        maf_data = extract_vcf_data_from_file(vcf, 'center name 1', 'sequence source 1', 'TUMOR', 'NORMAL', ['MuTect2','Strelka2','Custom_filters','Strelka2FILTER','RepeatMasker','PoN'], ['alt_count_raw','ref_count_raw','depth_raw'])
+        self.assertEqual(3, len(maf_data))
+        maf_row = maf_data[0]
+        self.assertEqual('1', maf_row['MuTect2'])
+        self.assertEqual('NA', maf_row['Strelka2'])
+        self.assertEqual('1184', maf_row['t_ref_count_raw'])
+        self.assertEqual('425', maf_row['n_depth_raw'])
+
+        with tempfile.NamedTemporaryFile(delete=False) as temp_file:
+            self.temp_files.append(temp_file.name)
+            write_standardized_mutation_file(maf_data, temp_file.name)
+
+        with open(self.temp_files[-1], 'r') as f:
+            maf_content = f.read()
+
+        self.assertIn('\tNA\t', maf_content)
 
 if __name__=='__main__':
     unittest.main()
