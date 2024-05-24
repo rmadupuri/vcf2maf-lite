@@ -24,7 +24,7 @@ python 3
 
 ### Running the tool example
 ```
-python3 vcf2maf.py --input-data /data/vcf --output-directory /data/maf/ --center-name CTR --sequence-source WGS --tumor-id Tumor --normal-id Normal --retain-info Custom_filters,AC,AF,AC_nfe_seu,AC_afr,AF_afr --retain-fmt alt_count_raw,ref_count_raw,depth_raw
+python3 vcf2maf.py --input-data /data/vcf --output-directory /data/maf/ --center CTR --sequence-source WGS --tumor-id Tumor --normal-id Normal --retain-info Custom_filters,AC,AF,AC_nfe_seu,AC_afr,AF_afr --retain-fmt alt_count_raw,ref_count_raw,depth_raw
 ```
 
 This command converts the VCF files in /vcf folder to MAF format. 
@@ -34,6 +34,21 @@ This command converts the VCF files in /vcf folder to MAF format.
 - The `--normal-id` option allows you to specify the ID of the normal sample used in the genotype columns of the VCF file. If the option is not used, the script will automatically identify the normal ID from either the `normal_sample` keyword in the meta data lines or the sample columns from VCF header.
 - The `--retain-info` option allows you to specify the INFO fields to be retained as additional columns in the MAF. If the option is not used, standard MAF columns are included by default.
 - The `--retain-fmt` option allows you to specify the FORMAT fields to be retained as additional columns in the MAF. If the option is not used, standard MAF columns are included by default.
+
+### Convert with Docker
+
+vcf2maf-lite is available in DockerHub at https://hub.docker.com/r/genomenexus/vcf2maf-lite
+
+Usage:
+```
+docker pull genomenexus/vcf2maf-lite:main
+```
+```
+docker run -v ${PWD}:/wd genomenexus/vcf2maf-lite:main python3 vcf2maf_lite.py --input-data /wd/test.vcf --output-directory /wd/maf/ --center CTR --sequence-source WGS --tumor-id Tumor --normal-id Normal --retain-info Custom_filters,AC,AF,AC_nfe_seu,AC_afr,AF_afr --retain-fmt alt_count_raw,ref_count_raw,depth_raw
+```
+- `-v ${PWD}:/wd`: This option maps the current working directory on your local machine to /wd directory inside the Docker container. This allows files in the local directory to be accessed from within the container.
+- `--input-data /wd/test.vcf`: This option specifies the input file location at /wd/test.vcf.
+- `--output-directory /wd/maf/`: This option specifies the output directory where the maf files will be saved. The files will be created at /wd/maf.
 
 ### Resolving allele counts:
 
