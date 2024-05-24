@@ -3,8 +3,6 @@
 import unittest
 import tempfile
 import os
-import sys
-sys.path.append('..')
 from vcf2maf_lite import extract_vcf_data_from_file
 from vcf2maf_lite import write_standardized_mutation_file
 
