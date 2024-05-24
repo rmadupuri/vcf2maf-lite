@@ -1018,14 +1018,14 @@ def resolve_vcf_matched_normal_allele_data(
 
 def create_additional_info_columns(retain_info, maf_data, vcf_data):
     for info_col in retain_info:
-        maf_data[info_col] = "1" if vcf_data['INFO'].get(info_col) == "" else vcf_data['INFO'].get(info_col, "")
+        maf_data[info_col] = "1" if vcf_data['INFO'].get(info_col) == "" else vcf_data['INFO'].get(info_col, "NA")
     return maf_data
 
 def create_additional_fmt_columns(retain_fmt, maf_data, vcf_data):
     for fmt_col in retain_fmt:
         prefix, col = fmt_col.split('_',1)
-        if prefix == 't': maf_data[fmt_col] = "1" if vcf_data['MAPPED_TUMOR_FORMAT_DATA'].get(col) == "" else vcf_data['MAPPED_TUMOR_FORMAT_DATA'].get(col, "")
-        if prefix == 'n': maf_data[fmt_col] = "1" if vcf_data['MAPPED_NORMAL_FORMAT_DATA'].get(col) == "" else vcf_data['MAPPED_NORMAL_FORMAT_DATA'].get(col, "")
+        if prefix == 't': maf_data[fmt_col] = "1" if vcf_data['MAPPED_TUMOR_FORMAT_DATA'].get(col) == "" else vcf_data['MAPPED_TUMOR_FORMAT_DATA'].get(col, "NA")
+        if prefix == 'n': maf_data[fmt_col] = "1" if vcf_data['MAPPED_NORMAL_FORMAT_DATA'].get(col) == "" else vcf_data['MAPPED_NORMAL_FORMAT_DATA'].get(col, "NA")
     return maf_data
 
 def create_maf_record_from_vcf(
@@ -1107,7 +1107,7 @@ def extract_vcf_format_info_data(
     This function formats the data in the 'INFO' column into an actual dictionary.
 
     Example:
-            vcf_data["INFO"] = { key1;value1, key2:value2, ... }
+            vcf_data["INFO"] = { key1:value1, key2:value2, ... }
 
     The 'FORMAT' column stores keys corresponding to values in the 'TUMOR' and 'NORMAL' column
     (if 'NORMAL' column is present in the VCF header). This function formats the data in the
