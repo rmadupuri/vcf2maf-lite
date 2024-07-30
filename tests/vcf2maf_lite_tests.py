@@ -3,8 +3,8 @@
 import unittest
 import tempfile
 import os
-from vcf2maf_lite import extract_vcf_data_from_file
-from vcf2maf_lite import write_standardized_mutation_file
+from vcf2maf_lite.vcf2maf_lite import extract_vcf_data_from_file
+from vcf2maf_lite.vcf2maf_lite import write_standardized_mutation_file
 
 class vcf2maf_lite_DataTests(unittest.TestCase):
 
