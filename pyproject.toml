@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "vcf2maf_lite"
-version = "0.1.0"
+version = "0.1.1"
 description = "VCF to MAF format converter"
 authors = [
 	"Angelica Ochoa",
@@ -21,7 +21,7 @@ repository = "https://github.com/genome-nexus/vcf2maf-lite"
 keywords = ["vcf2maf", "vcftomaf", "vcf", "maf", "lite"]
 
 [tool.poetry.scripts]
-test_vcf = "vcf2maf_lite.vcf2maf_lite:main"
+vcf2maf_lite = "vcf2maf_lite.vcf2maf_lite:main"
 
 [tool.poetry.urls]
 "Bug Tracker" = "https://github.com/genome-nexus/vcf2maf-lite/issues"
