@@ -292,7 +292,7 @@ class vcf2maf_lite_DataTests(unittest.TestCase):
 
         # Verify insertion coordinates: VCF POS should NOT be incremented for insertions
         maf_row_ins = maf_data[1]
-        self.assertEqual('In_Frame_Ins', maf_row_ins['Variant_Classification'])
+        self.assertEqual('Frame_Shift_Ins', maf_row_ins['Variant_Classification'])
         self.assertEqual('INS', maf_row_ins['Variant_Type'])
         self.assertEqual('-', maf_row_ins['Reference_Allele'])
         self.assertEqual('CC', maf_row_ins['Tumor_Seq_Allele2'])
