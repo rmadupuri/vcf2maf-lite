@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "vcf2maf_lite"
-version = "0.1.1"
+version = "0.1.2"
 description = "VCF to MAF format converter"
 authors = [
 	"Angelica Ochoa",
@@ -27,7 +27,7 @@ vcf2maf_lite = "vcf2maf_lite.vcf2maf_lite:main"
 "Bug Tracker" = "https://github.com/genome-nexus/vcf2maf-lite/issues"
 
 [tool.poetry.dependencies]
-python = ">=3.7"
+python = ">=3.10"
 chardet = "^5.0.0"
 click = "8.0.*"
 
